@@ -3,3 +3,5 @@ g++ -std=c++17 -I/opt/homebrew/Cellar/boost/1.84.0_1/include/ -I/opt/homebrew/Ce
 or
 
 g++ -std=c++17 -I/opt/homebrew/Cellar/boost/1.84.0_1/include/ main.cpp gen/presence_notification.pb.cc $(pkg-config --cflags --libs protobuf)
+
+g++ -std=c++17 -I. -I/opt/homebrew/Cellar/boost/1.84.0_1/include/ main.cpp gen/presence_notification.pb.cc network/presence_notifier.cpp $(pkg-config --cflags --libs protobuf)
