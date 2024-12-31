@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "presence_notifier.h"
-#include "gen/presence_notification.pb.h"
+#include "presence_notification.pb.h"
 
 using boost::asio::ip::udp;
 
