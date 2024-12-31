@@ -1,0 +1,5 @@
+g++ -std=c++17 -I/opt/homebrew/Cellar/boost/1.84.0_1/include/ -I/opt/homebrew/Cellar/protobuf/29.2/include/ -I/opt/homebrew/Cellar/abseil/20240722.0/include/ main.cpp gen/presence_notification.pb.cc -L/opt/homebrew/Cellar/protobuf/29.2/lib/ -lprotobuf -L/opt/homebrew/Cellar/abseil/20240722.0/lib/ -labsl_log_internal_message -labsl_log_internal_check_op 
+
+or
+
+g++ -std=c++17 -I/opt/homebrew/Cellar/boost/1.84.0_1/include/ main.cpp gen/presence_notification.pb.cc $(pkg-config --cflags --libs protobuf)
