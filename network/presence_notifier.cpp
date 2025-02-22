@@ -24,6 +24,20 @@ PresenceNotifier::PresenceNotifier(boost::asio::io_context&        ioc,
     publishNotification();
 }
 
+void PresenceNotifier::run(const std::string& mc_addr,
+                           uint16_t           mc_port,
+                           const std::string& name,
+                           const std::string& description) {
+    boost::asio::io_context ioc;
+
+    PresenceNotifier notifier(
+        ioc, boost::asio::ip::make_address(mc_addr), mc_port,
+        name, description
+    );
+
+    ioc.run();
+}
+
 void PresenceNotifier::publishNotification() {
     socket.async_send_to(
         boost::asio::buffer(msg_buffer.data(), msg_buffer.size()),
