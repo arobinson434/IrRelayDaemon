@@ -17,8 +17,8 @@ protobuf_generate_cpp(
 set(IRD_SRCS
     "main.cpp"
     "${PROTO_SRC}"
-    "network/presence_notifier.cpp"
-    "network/learning_service.cpp"
+    "services/presence_notifier.cpp"
+    "services/learning_service.cpp"
 )
 
 add_executable(IrRelayDaemon ${IRD_SRCS})

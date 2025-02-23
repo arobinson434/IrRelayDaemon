@@ -1,8 +1,8 @@
 #include <google/protobuf/stubs/common.h>
 #include <thread>
 
-#include "network/presence_notifier.h"
-#include "network/learning_service.h"
+#include "services/presence_notifier.h"
+#include "services/learning_service.h"
 
 // This application runs across three threads (including this main thread).
 //  Thread #1
