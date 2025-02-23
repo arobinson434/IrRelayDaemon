@@ -1,8 +1,8 @@
-#include <boost/asio.hpp>
 #include <google/protobuf/stubs/common.h>
+#include <thread>
 
-#include "constants/network.h"
 #include "network/presence_notifier.h"
+#include "network/learning_service.h"
 
 // This application runs across three threads (including this main thread).
 //  Thread #1
@@ -21,10 +21,11 @@
 int main() {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    PresenceNotifier::run(
-        PRESENCE_NOTIFIER_ADDR, PRESENCE_NOTIFIER_PORT,
-        "Living Room", "IR Relay in the Living Room"
-    );
+    // TODO: read input .ini file for name and description
+
+    std::thread learning_thread(LearningService::run, "Living Room");
+
+    PresenceNotifier::run("Living Room", "IR Relay in the Living Room");
 
     google::protobuf::ShutdownProtobufLibrary();
 

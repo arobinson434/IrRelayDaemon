@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "../constants/network.h"
 #include "presence_notifier.h"
 #include "presence_notification.pb.h"
 
@@ -15,7 +16,7 @@ PresenceNotifier::PresenceNotifier(boost::asio::io_context&        ioc,
     timer(ioc)
 {
     IrRelay::PresenceNotification notification;
-    notification.set_name(name);   
+    notification.set_name(name);
     notification.set_description(description);
 
     msg_buffer.resize(notification.ByteSizeLong());
@@ -24,15 +25,13 @@ PresenceNotifier::PresenceNotifier(boost::asio::io_context&        ioc,
     publishNotification();
 }
 
-void PresenceNotifier::run(const std::string& mc_addr,
-                           uint16_t           mc_port,
-                           const std::string& name,
+void PresenceNotifier::run(const std::string& name,
                            const std::string& description) {
     boost::asio::io_context ioc;
 
     PresenceNotifier notifier(
-        ioc, boost::asio::ip::make_address(mc_addr), mc_port,
-        name, description
+        ioc, boost::asio::ip::make_address(PRESENCE_NOTIFIER_ADDR),
+        PRESENCE_NOTIFIER_PORT, name, description
     );
 
     ioc.run();
@@ -44,8 +43,9 @@ void PresenceNotifier::publishNotification() {
         mcast_ep,
         [this](boost::system::error_code ec, std::size_t) {
             if ( ec )
-                std::cerr << "Failed to send presence notification!"
-                          << " Error Code: " << ec << std::endl;
+                std::cerr << "Presence Notifier: "
+                          << "Failed to send presence notification!"
+                          << "\n\tError Code: " << ec << std::endl;
 
             waitToPublish();
         }
