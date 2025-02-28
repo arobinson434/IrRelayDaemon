@@ -19,9 +19,9 @@ void LearningService::run(const std::string& name) {
     }
 }
 
-LearningService::LearningService(const std::string&    name,
-                                 const bai::address&   mc_addr,
-                                 uint16_t              mc_port):
+LearningService::LearningService(const std::string&  name,
+                                 const bai::address& mc_addr,
+                                 uint16_t            mc_port):
     name(name),
     io_ctx(),
     mcast_ep(mc_addr, mc_port),
@@ -106,6 +106,7 @@ void LearningService::publishIrCommand() {
     msg_buffer.resize(command_msg.ByteSizeLong());
     command_msg.SerializeToArray(msg_buffer.data(), msg_buffer.size());
 
+    // TODO: drop async to send_to
     socket.async_send_to(
         boost::asio::buffer(msg_buffer.data(), msg_buffer.size()),
         mcast_ep,

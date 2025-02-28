@@ -19,6 +19,7 @@ set(IRD_SRCS
     "${PROTO_SRC}"
     "services/presence_notifier.cpp"
     "services/learning_service.cpp"
+    "services/listening_service.cpp"
 )
 
 add_executable(IrRelayDaemon ${IRD_SRCS})

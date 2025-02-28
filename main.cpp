@@ -3,6 +3,7 @@
 
 #include "services/presence_notifier.h"
 #include "services/learning_service.h"
+#include "services/listening_service.h"
 
 // This application runs across three threads (including this main thread).
 //  Thread #1
@@ -24,6 +25,7 @@ int main() {
     // TODO: read input .ini file for name and description
 
     std::thread learning_thread(LearningService::run, "Living Room");
+    std::thread listening_thread(ListeningService::run, "Living Room");
 
     PresenceNotifier::run("Living Room", "IR Relay in the Living Room");
 
