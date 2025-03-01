@@ -106,21 +106,18 @@ void LearningService::publishIrCommand() {
     msg_buffer.resize(command_msg.ByteSizeLong());
     command_msg.SerializeToArray(msg_buffer.data(), msg_buffer.size());
 
-    // TODO: drop async to send_to
-    socket.async_send_to(
+    auto sent_bytes = socket.send_to(
         boost::asio::buffer(msg_buffer.data(), msg_buffer.size()),
-        mcast_ep,
-        [this](boost::system::error_code ec, std::size_t) {
-            if ( ec ) {
-                std::cerr << "Learning Service: Failed to publish command!"
-                          << "\n\tError Code: " << ec << std::endl;
-
-                // TODO
-                // Stop the blue blink and issue three red status blink
-            } else {
-                // TODO
-                // Stop the blue blink and issue one green status blink
-            }
-        }
+        mcast_ep
     );
+
+    if ( sent_bytes != msg_buffer.size() ) {
+        std::cerr << "Learning Service: Failed to publish command!";
+
+        // TODO
+        // Stop the blue blink and issue three red status blink
+    } else {
+        // TODO
+        // Stop the blue blink and issue one green status blink
+    }
 }
