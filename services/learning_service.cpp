@@ -2,8 +2,9 @@
 
 #include "../constants/network.h"
 #include "../constants/hardware.h"
-#include "learning_service.h"
 #include "ir_command.pb.h"
+#include "learning_service.h"
+#include "status_led_mgr.h"
 
 namespace bai  = boost::asio::ip;
 
@@ -42,7 +43,7 @@ void LearningService::waitOnButton() {
 
     button_lr.wait_edge_events(std::chrono::seconds(-1));
 
-    // TODO: start the status light blinking blue
+    StatusLedMgr::setBlueOn(true);
 }
 
 bool LearningService::receiveIrCommand() {
@@ -79,14 +80,14 @@ bool LearningService::receiveIrCommand() {
         } else {
             std::cerr << "Learning Service: Bad Signal Received!";
 
-            // TODO
-            // Stop the blue blink and issue two red status blink
+            StatusLedMgr::setBlueOn(false);
+            StatusLedMgr::addToRed(2);
         }
     } else {
         std::cerr << "Learning Service: No Signal Received!";
 
-        // TODO
-        // Stop the blue blink and issue one red status blink
+        StatusLedMgr::setBlueOn(false);
+        StatusLedMgr::addToRed(1);
     }
 
     return success;
@@ -111,13 +112,12 @@ void LearningService::publishIrCommand() {
         mcast_ep
     );
 
+    StatusLedMgr::setBlueOn(false);
+
     if ( sent_bytes != msg_buffer.size() ) {
         std::cerr << "Learning Service: Failed to publish command!";
-
-        // TODO
-        // Stop the blue blink and issue three red status blink
+        StatusLedMgr::addToRed(3);
     } else {
-        // TODO
-        // Stop the blue blink and issue one green status blink
+        StatusLedMgr::addToGreen(2);
     }
 }

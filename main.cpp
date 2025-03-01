@@ -1,9 +1,11 @@
 #include <google/protobuf/stubs/common.h>
 #include <thread>
 
+#include "constants/network.h"
 #include "services/presence_notifier.h"
 #include "services/learning_service.h"
 #include "services/listening_service.h"
+#include "services/status_led_mgr.h"
 
 // This application runs across three threads (including this main thread).
 //  Thread #1
@@ -24,10 +26,23 @@ int main() {
 
     // TODO: read input .ini file for name and description
 
+    boost::asio::io_context ioc;
+    PresenceNotifier notifier(
+        ioc, boost::asio::ip::make_address(PRESENCE_NOTIFIER_ADDR),
+        PRESENCE_NOTIFIER_PORT,
+        "Living Room",
+        "IR Relay in the Living Room"
+    );
+    StatusLedMgr::initialize(ioc);
+
     std::thread learning_thread(LearningService::run, "Living Room");
     std::thread listening_thread(ListeningService::run, "Living Room");
 
-    PresenceNotifier::run("Living Room", "IR Relay in the Living Room");
+    // Start Indicator; 2 x (GREEN + BLUE + OFF)
+    StatusLedMgr::addToGreen(2);
+    StatusLedMgr::addToBlue(2);
+
+    ioc.run();
 
     google::protobuf::ShutdownProtobufLibrary();
 

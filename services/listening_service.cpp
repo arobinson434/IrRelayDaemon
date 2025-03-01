@@ -2,8 +2,9 @@
 
 #include "../constants/network.h"
 #include "../constants/hardware.h"
-#include "listening_service.h"
 #include "ir_command.pb.h"
+#include "listening_service.h"
+#include "status_led_mgr.h"
 
 using Clock     = std::chrono::high_resolution_clock;
 using TimePoint = std::chrono::time_point<Clock>;
@@ -106,5 +107,7 @@ void ListeningService::issueIrCommand() {
         }
     }
     ir_snd_lr.set_value(ir_offset, gpiod::line::value::INACTIVE);
+
+    StatusLedMgr::addToGreen(1);
 }
 

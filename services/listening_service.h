@@ -29,7 +29,7 @@ class ListeningService {
         void busyWaitUntil(const std::chrono::time_point<std::chrono::high_resolution_clock>& go_time);
 
         std::string                    name;
-        boost::asio::io_context        io_ctx;
+        boost::asio::io_context        io_ctx; // TODO: remove this
         boost::asio::ip::udp::endpoint mcast_ep;
         boost::asio::ip::udp::socket   socket;
 

@@ -15,18 +15,13 @@ class PresenceNotifier {
         static void run(const std::string& name,
                         const std::string& description);
 
-        PresenceNotifier(const PresenceNotifier&)            = delete;
-        PresenceNotifier(PresenceNotifier&&)                 = delete;
-        PresenceNotifier& operator=(const PresenceNotifier&) = delete;
-        PresenceNotifier& operator=(PresenceNotifier&&)      = delete;
-
-    private:
         PresenceNotifier(boost::asio::io_context&        ioc,
                          const boost::asio::ip::address& mc_addr,
                          uint16_t                        mc_port,
                          const std::string&              name,
                          const std::string&              description);
 
+    private:
         void publishNotification();
         void waitToPublish();
 
