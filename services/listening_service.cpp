@@ -11,6 +11,12 @@ using TimePoint = std::chrono::time_point<Clock>;
 
 namespace bai  = boost::asio::ip;
 
+gpiod::line::value operator!(gpiod::line::value val) {
+    if ( val == gpiod::line::value::INACTIVE )
+        return gpiod::line::value::ACTIVE;
+    return gpiod::line::value::INACTIVE;
+}
+
 void ListeningService::run(const std::string& name) {
     ListeningService listening_service(name,
                                        bai::make_address(CMD_RECEIVE_ADDR),
@@ -57,12 +63,6 @@ bool ListeningService::receiveNetworkCommand() {
 
 void ListeningService::busyWaitUntil(const TimePoint& go_time) {
     while( Clock::now() < go_time );
-}
-
-gpiod::line::value operator!(gpiod::line::value val) {
-    if ( val == gpiod::line::value::INACTIVE )
-        return gpiod::line::value::ACTIVE;
-    return gpiod::line::value::INACTIVE;
 }
 
 void ListeningService::issueIrCommand() {

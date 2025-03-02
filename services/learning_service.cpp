@@ -78,14 +78,12 @@ bool LearningService::receiveIrCommand() {
 
             success = true;
         } else {
-            std::cerr << "Learning Service: Bad Signal Received!";
-
+            // Bad Signal Received
             StatusLedMgr::setBlueOn(false);
             StatusLedMgr::addToRed(2);
         }
     } else {
-        std::cerr << "Learning Service: No Signal Received!";
-
+        // No Signal Received
         StatusLedMgr::setBlueOn(false);
         StatusLedMgr::addToRed(1);
     }
@@ -114,10 +112,8 @@ void LearningService::publishIrCommand() {
 
     StatusLedMgr::setBlueOn(false);
 
-    if ( sent_bytes != msg_buffer.size() ) {
-        std::cerr << "Learning Service: Failed to publish command!";
-        StatusLedMgr::addToRed(3);
-    } else {
+    if ( sent_bytes != msg_buffer.size() )
+        StatusLedMgr::addToRed(3); // Failed to publish command
+    else
         StatusLedMgr::addToGreen(2);
-    }
 }

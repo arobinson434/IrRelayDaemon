@@ -63,6 +63,7 @@ StatusLedMgr::StatusLedMgr(boost::asio::io_context& ioc):
     red_count(0), green_count(0), blue_count(0), blue_on(false),
     led_lr(std::move( gpiod::chip(gpio_path)
                         .prepare_request()
+                        .set_consumer("status_led")
                         .add_line_settings(
                             led_pins,
                             gpiod::line_settings()
@@ -74,7 +75,7 @@ StatusLedMgr::StatusLedMgr(boost::asio::io_context& ioc):
 }
 
 StatusLedMgr::~StatusLedMgr() {
-    if ( !instance_ptr )
+    if ( instance_ptr )
         delete instance_ptr;
 }
 
@@ -103,7 +104,7 @@ void StatusLedMgr::tickHandler() {
 
     count++;
 
-    timer.expires_after(std::chrono::milliseconds(166));
+    timer.expires_after(std::chrono::milliseconds(150));
     timer.async_wait( std::bind(&StatusLedMgr::tickHandler, this) );
 }
 

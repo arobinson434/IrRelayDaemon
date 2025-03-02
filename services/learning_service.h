@@ -28,7 +28,7 @@ class LearningService {
                         uint16_t                        mc_port);
 
         std::string                    name;
-        boost::asio::io_context        io_ctx; // TODO: remove this
+        boost::asio::io_context        io_ctx;
         boost::asio::ip::udp::endpoint mcast_ep;
         boost::asio::ip::udp::socket   socket;
 

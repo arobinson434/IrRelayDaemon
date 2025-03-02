@@ -4,24 +4,26 @@
 
 class PresenceNotifier {
     public:
-        /**
-         * Create and start a PresenceNotifier object on the current thread,
-         *  eliding the need to provide a boost IO context.
-         *
-         * As the context is created and run locally, this function NEVER
-         *  returns. If you need to do work after invoking this function, you
-         *  should run it in it's own thread.
-         */
-        static void run(const std::string& name,
-                        const std::string& description);
+        static void initialize(boost::asio::io_context& ioc,
+                               const std::string&       name,
+                               const std::string&       description);
 
+        PresenceNotifier(const PresenceNotifier&)            = delete;
+        PresenceNotifier(PresenceNotifier&&)                 = delete;
+        PresenceNotifier& operator=(const PresenceNotifier&) = delete;
+        PresenceNotifier& operator=(PresenceNotifier&&)      = delete;
+
+        ~PresenceNotifier();
+
+    private:
         PresenceNotifier(boost::asio::io_context&        ioc,
                          const boost::asio::ip::address& mc_addr,
                          uint16_t                        mc_port,
                          const std::string&              name,
                          const std::string&              description);
 
-    private:
+        static PresenceNotifier* instance_ptr;
+
         void publishNotification();
         void waitToPublish();
 

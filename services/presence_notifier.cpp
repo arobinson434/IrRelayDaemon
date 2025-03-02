@@ -4,7 +4,7 @@
 #include "presence_notifier.h"
 #include "presence_notification.pb.h"
 
-using boost::asio::ip::udp;
+PresenceNotifier* PresenceNotifier::instance_ptr = nullptr;
 
 PresenceNotifier::PresenceNotifier(boost::asio::io_context&        ioc,
                                    const boost::asio::ip::address& mc_addr,
@@ -25,39 +25,33 @@ PresenceNotifier::PresenceNotifier(boost::asio::io_context&        ioc,
     publishNotification();
 }
 
-void PresenceNotifier::run(const std::string& name,
-                           const std::string& description) {
-    boost::asio::io_context ioc;
+PresenceNotifier::~PresenceNotifier() {
+    if ( instance_ptr )
+        delete instance_ptr;
+}
 
-    PresenceNotifier notifier(
-        ioc, boost::asio::ip::make_address(PRESENCE_NOTIFIER_ADDR),
-        PRESENCE_NOTIFIER_PORT, name, description
-    );
-
-    ioc.run();
+void PresenceNotifier::initialize(boost::asio::io_context& ioc,
+                                  const std::string&       name,
+                                  const std::string&       description) {
+    if ( !instance_ptr )
+        instance_ptr = new PresenceNotifier(
+            ioc, boost::asio::ip::make_address(PRESENCE_NOTIFIER_ADDR),
+            PRESENCE_NOTIFIER_PORT, name, description);
+    else
+        throw std::runtime_error(
+            "Attempted to double initialize PresenceNotifier!!!");
 }
 
 void PresenceNotifier::publishNotification() {
     socket.async_send_to(
         boost::asio::buffer(msg_buffer.data(), msg_buffer.size()),
         mcast_ep,
-        [this](boost::system::error_code ec, std::size_t) {
-            if ( ec )
-                std::cerr << "Presence Notifier: "
-                          << "Failed to send presence notification!"
-                          << "\n\tError Code: " << ec << std::endl;
-
-            waitToPublish();
-        }
+        std::bind(&PresenceNotifier::waitToPublish, this)
     );
 }
 
 void PresenceNotifier::waitToPublish() {
     timer.expires_after(std::chrono::seconds(5));
-    timer.async_wait(
-        [this](boost::system::error_code ec) {
-            publishNotification();
-        }
-    );
+    timer.async_wait( std::bind(&PresenceNotifier::publishNotification, this) );
 }
 
