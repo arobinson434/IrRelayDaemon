@@ -40,7 +40,7 @@ the `LearningService` and `ListeningService` each run on their own threads.
 The status LED conveys the following:
 | LED                   | Meaning                                                      |
 |:---------             |:--------                                                     |
-|2 x Green+Blue Flashes | The daemon has started                                       |
+|3 x Green+Blue Flashes | The daemon has started                                       |
 |1 x Green Flashes      | Network request received and issued over IR                  |
 |Continued Blue Flashes | The board is in learning mode, and waiting for an IR signal  |
 |2 x Green Flashes      | An IR signal has been recorded, and published to the network |

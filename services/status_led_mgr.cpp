@@ -104,7 +104,7 @@ void StatusLedMgr::tickHandler() {
 
     count++;
 
-    timer.expires_after(std::chrono::milliseconds(150));
+    timer.expires_after(std::chrono::milliseconds(200));
     timer.async_wait( std::bind(&StatusLedMgr::tickHandler, this) );
 }
 
