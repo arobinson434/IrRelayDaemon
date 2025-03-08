@@ -49,3 +49,7 @@ The status LED conveys the following:
 |1 x Red Flash          | Learning mode timed out waiting for an IR signal             |
 |2 x Red Flash          | Learning mode received an invalid IR signal                  |
 |3 x Red Flash          | Learning mode failed to publish the recorded IR signal       |
+
+## Hardware
+The current config of this project assumes the following hardware setup:
+![Circuit Overview](https://github.com/arobinson434/IrRelayDaemon/blob/main/docs/overview.png)
