@@ -1,7 +1,7 @@
 # IR Relay Daemon
 This project houses a simple IR relay service that is intended to run on a
 Raspberry Pi. The daemon listens to the network for incoming, IR transmission
-requests. When received, the daemon with transmit the IR signal described in
+requests. When received, the daemon will transmit the IR signal described in
 the request. The daemon will also listen for a button push on the Raspberry Pi,
 and once triggered, will listen for an IR signal on it's IR receiver. If a
 signal is received, it will publish that signal to the network.
@@ -13,12 +13,14 @@ transmission requests to this daemon.
 ## Build Environment
 I am cross-compiling this with buildroot.
 
-In the near future, I plan to build up a buildroot external config repo, which
-will pull and build this project by default. Once I am done with that effort,
-I will link that repo here.
+If you wish to build a minimal buildroot image with this package, my
+[PiIrRelay](https://github.com/arobinson434/PiIrRelay) project should have you
+covered! Just head there, and follow the instructions.
 
-In the mean time, you too can build this with buildroot's tool-chain assuming
-you have ProtoBuf and Boost in that environment.
+If you want to build this daemon standalone, you can do that here, provided that
+you have `boost` (with `boost-program_options`), `protobuf`, and `libgpiod2`.
+Additionally, you may need to modify `constants/hardware.h`, depending on your
+GPIO setup.
 
 ## Structure
 This program runs four services across three threads (including the main
