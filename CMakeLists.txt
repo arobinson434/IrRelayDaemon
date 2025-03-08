@@ -27,3 +27,4 @@ add_executable(IrRelayDaemon ${IRD_SRCS})
 target_include_directories(IrRelayDaemon PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(IrRelayDaemon PRIVATE ${PROTOBUF_LIBRARY} gpiodcxx boost_program_options)
 
+install(TARGETS IrRelayDaemon)
