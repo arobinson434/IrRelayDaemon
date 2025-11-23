@@ -44,14 +44,16 @@ void LearningService::receiveIrCommand() {
     ir_rcv_lr.wait_edge_events(std::chrono::seconds(-1));
     gpiod::edge_event_buffer buffer(100);
 
-    while ( ir_rcv_lr.wait_edge_events(std::chrono::milliseconds(65)) ) {
+    while ( ir_rcv_lr.wait_edge_events(std::chrono::milliseconds(10)) ) {
         ir_rcv_lr.read_edge_events(buffer);
 
         for( auto event: buffer )
             timestamps.push_back(event.timestamp_ns().ns());
     }
 
-    if ( timestamps.size() > 10 && timestamps.size() % 2 == 0 ) {
+    if ( timestamps.size() > 30 &&
+         timestamps.size() < 100 &&
+         timestamps.size() % 2 == 0 ) {
         cmd_deltas.clear();
         for (int index=1; index < timestamps.size(); index++)
             cmd_deltas.push_back(timestamps[index] - timestamps[index-1]);
