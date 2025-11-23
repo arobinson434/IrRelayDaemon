@@ -13,10 +13,6 @@ class LearningService {
          */
         static void run(const std::string& name);
 
-        void waitOnButton();
-        bool receiveIrCommand();
-        void publishIrCommand();
-
         LearningService(const LearningService&)            = delete;
         LearningService(LearningService&&)                 = delete;
         LearningService& operator=(const LearningService&) = delete;
@@ -26,6 +22,10 @@ class LearningService {
         LearningService(const std::string&              name,
                         const boost::asio::ip::address& mc_ep,
                         uint16_t                        mc_port);
+
+        void waitOnButton();
+        bool receiveIrCommand();
+        void publishIrCommand();
 
         std::string                    name;
         boost::asio::io_context        io_ctx;

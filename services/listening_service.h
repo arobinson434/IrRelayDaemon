@@ -13,9 +13,6 @@ class ListeningService {
          */
         static void run(const std::string& name);
 
-        bool receiveNetworkCommand();
-        void issueIrCommand();
-
         ListeningService(const ListeningService&)            = delete;
         ListeningService(ListeningService&&)                 = delete;
         ListeningService& operator=(const ListeningService&) = delete;
@@ -25,6 +22,9 @@ class ListeningService {
         ListeningService(const std::string&              name,
                          const boost::asio::ip::address& mc_ep,
                          uint16_t                        mc_port);
+
+        bool receiveNetworkCommand();
+        void issueIrCommand();
 
         void busyWaitUntil(const std::chrono::time_point<std::chrono::high_resolution_clock>& go_time);
 
