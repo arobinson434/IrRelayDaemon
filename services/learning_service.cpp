@@ -14,9 +14,7 @@ void LearningService::run(const std::string& name) {
                                      CMD_ADVERTISE_PORT);
 
     while ( true ) {
-        learning_service.waitOnButton();
-        if ( learning_service.receiveIrCommand() )
-            learning_service.publishIrCommand();
+        learning_service.receiveIrCommand();
     }
 }
 
@@ -29,25 +27,7 @@ LearningService::LearningService(const std::string&  name,
     socket(io_ctx, mcast_ep.protocol())
 { }
 
-void LearningService::waitOnButton() {
-    auto settings   = gpiod::line_settings()
-                        .set_direction(gpiod::line::direction::INPUT)
-                        .set_edge_detection(gpiod::line::edge::FALLING)
-                        .set_bias(gpiod::line::bias::PULL_UP);
-    auto btn_offset = gpiod::line::offset(INPUT_BUTTON);
-    auto button_lr  = gpiod::chip(std::filesystem::path(GPIO_CHIP_PATH))
-                        .prepare_request()
-                        .set_consumer("button_input")
-                        .add_line_settings(btn_offset, settings)
-                        .do_request();
-
-    button_lr.wait_edge_events(std::chrono::seconds(-1));
-
-    StatusLedMgr::setBlueOn(true);
-}
-
-bool LearningService::receiveIrCommand() {
-    bool                  success = false;
+void LearningService::receiveIrCommand() {
     std::vector<uint64_t> timestamps;
 
     auto settings   = gpiod::line_settings()
@@ -61,34 +41,23 @@ bool LearningService::receiveIrCommand() {
                         .add_line_settings(ir_offset, settings)
                         .do_request();
 
-    if ( ir_rcv_lr.wait_edge_events(std::chrono::seconds(30)) ) {
-        gpiod::edge_event_buffer buffer(100);
+    ir_rcv_lr.wait_edge_events(std::chrono::seconds(-1));
+    gpiod::edge_event_buffer buffer(100);
 
-        while ( ir_rcv_lr.wait_edge_events(std::chrono::milliseconds(65)) ) {
-            ir_rcv_lr.read_edge_events(buffer);
+    while ( ir_rcv_lr.wait_edge_events(std::chrono::milliseconds(65)) ) {
+        ir_rcv_lr.read_edge_events(buffer);
 
-            for( auto event: buffer )
-                timestamps.push_back(event.timestamp_ns().ns());
-        }
-
-        if ( timestamps.size() > 1 && timestamps.size() % 2 == 0 ) {
-            cmd_deltas.clear();
-            for (int index=1; index < timestamps.size(); index++)
-                cmd_deltas.push_back(timestamps[index] - timestamps[index-1]);
-
-            success = true;
-        } else {
-            // Bad Signal Received
-            StatusLedMgr::setBlueOn(false);
-            StatusLedMgr::addToRed(2);
-        }
-    } else {
-        // No Signal Received
-        StatusLedMgr::setBlueOn(false);
-        StatusLedMgr::addToRed(1);
+        for( auto event: buffer )
+            timestamps.push_back(event.timestamp_ns().ns());
     }
 
-    return success;
+    if ( timestamps.size() > 10 && timestamps.size() % 2 == 0 ) {
+        cmd_deltas.clear();
+        for (int index=1; index < timestamps.size(); index++)
+            cmd_deltas.push_back(timestamps[index] - timestamps[index-1]);
+
+        publishIrCommand();
+    }
 }
 
 void LearningService::publishIrCommand() {
@@ -109,8 +78,6 @@ void LearningService::publishIrCommand() {
         boost::asio::buffer(msg_buffer.data(), msg_buffer.size()),
         mcast_ep
     );
-
-    StatusLedMgr::setBlueOn(false);
 
     if ( sent_bytes != msg_buffer.size() )
         StatusLedMgr::addToRed(3); // Failed to publish command

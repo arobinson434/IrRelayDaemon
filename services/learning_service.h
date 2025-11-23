@@ -23,8 +23,7 @@ class LearningService {
                         const boost::asio::ip::address& mc_ep,
                         uint16_t                        mc_port);
 
-        void waitOnButton();
-        bool receiveIrCommand();
+        void receiveIrCommand();
         void publishIrCommand();
 
         std::string                    name;
