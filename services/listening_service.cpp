@@ -108,6 +108,6 @@ void ListeningService::issueIrCommand() {
     }
     ir_snd_lr.set_value(ir_offset, gpiod::line::value::INACTIVE);
 
-    StatusLedMgr::addToGreen(1);
+    StatusLedMgr::add(1);
 }
 

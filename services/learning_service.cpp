@@ -82,7 +82,7 @@ void LearningService::publishIrCommand() {
     );
 
     if ( sent_bytes != msg_buffer.size() )
-        StatusLedMgr::addToRed(3); // Failed to publish command
+        StatusLedMgr::add(3); // Failed to publish command
     else
-        StatusLedMgr::addToGreen(2);
+        StatusLedMgr::add(2);
 }

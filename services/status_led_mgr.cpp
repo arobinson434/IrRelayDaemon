@@ -2,7 +2,6 @@
 #include "../constants/hardware.h"
 
 const std::filesystem::path gpio_path(GPIO_CHIP_PATH);
-const gpiod::line::offsets  led_pins{ RED_LED, GREEN_LED, BLUE_LED };
 
 StatusLedMgr* StatusLedMgr::instance_ptr = nullptr;
 
@@ -14,58 +13,22 @@ void StatusLedMgr::initialize(boost::asio::io_context& ioc) {
             "Attempted to double initialize StatusLedMgr!!!");
 }
 
-void StatusLedMgr::addToRed(uint8_t count) {
+void StatusLedMgr::add(uint8_t count) {
     if ( !instance_ptr )
         throw std::runtime_error(
-            "StatusLedMgr: 'addToRed' called on uninitialized mgr!");
+            "StatusLedMgr: 'add' called on uninitialized mgr!");
 
     std::lock_guard<std::mutex> g(instance_ptr->state_lock);
-    instance_ptr->red_count += count;
-}
-
-void StatusLedMgr::addToGreen(uint8_t count) {
-    if ( !instance_ptr )
-        throw std::runtime_error(
-            "StatusLedMgr: 'addToGreen' called on uninitialized mgr!");
-
-    std::lock_guard<std::mutex> g(instance_ptr->state_lock);
-    instance_ptr->green_count += count;
-}
-
-void StatusLedMgr::addToBlue(uint8_t count) {
-    if ( !instance_ptr )
-        throw std::runtime_error(
-            "StatusLedMgr: 'addToBlue' called on uninitialized mgr!");
-
-    std::lock_guard<std::mutex> g(instance_ptr->state_lock);
-    instance_ptr->blue_count += count;
-}
-
-void StatusLedMgr::setBlueOn(bool on) {
-    if ( !instance_ptr )
-        throw std::runtime_error(
-            "StatusLedMgr: 'setBlueOn' called on uninitialized mgr!");
-
-    std::lock_guard<std::mutex> g(instance_ptr->state_lock);
-    instance_ptr->blue_on = on;
-}
-
-void StatusLedMgr::allOff() {
-    led_lr.set_values( led_pins, {
-        gpiod::line::value::INACTIVE,
-        gpiod::line::value::INACTIVE,
-        gpiod::line::value::INACTIVE
-    });
+    instance_ptr->blink_count += count;
 }
 
 StatusLedMgr::StatusLedMgr(boost::asio::io_context& ioc):
-    ioc(ioc), timer(ioc), count(0),
-    red_count(0), green_count(0), blue_count(0), blue_on(false),
+    ioc(ioc), timer(ioc), count(0), blink_count(0),
     led_lr(std::move( gpiod::chip(gpio_path)
                         .prepare_request()
                         .set_consumer("status_led")
                         .add_line_settings(
-                            led_pins,
+                            gpiod::line::offset(STATUS_LED),
                             gpiod::line_settings()
                                 .set_direction(gpiod::line::direction::OUTPUT)
                         )
@@ -80,24 +43,15 @@ StatusLedMgr::~StatusLedMgr() {
 }
 
 void StatusLedMgr::tickHandler() {
-    allOff();
+    led_lr.set_value(gpiod::line::offset(STATUS_LED),
+        gpiod::line::value::INACTIVE);
 
     {
         std::lock_guard<std::mutex> g(state_lock);
 
-        if ( count % 3 == 0 && red_count > 0 ) { // RED
-            red_count--;
-            led_lr.set_value(gpiod::line::offset(RED_LED),
-                gpiod::line::value::ACTIVE);
-        } else if ( count % 3 == 1 && green_count > 0 ) { // GREEN
-            green_count--;
-            led_lr.set_value(gpiod::line::offset(GREEN_LED),
-                gpiod::line::value::ACTIVE);
-        } else if ( count % 3 == 2 && (blue_count > 0 || blue_on) ) { // BLUE
-            if ( blue_count > 0 )
-                blue_count--;
-
-            led_lr.set_value(gpiod::line::offset(BLUE_LED),
+        if ( count % 2 == 0 && blink_count > 0 ) {
+            blink_count--;
+            led_lr.set_value(gpiod::line::offset(STATUS_LED),
                 gpiod::line::value::ACTIVE);
         }
     }

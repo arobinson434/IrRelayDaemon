@@ -20,9 +20,8 @@ void runDaemon(const std::string& name, const std::string& description) {
     std::thread learning_thread(LearningService::run, name);
     std::thread listening_thread(ListeningService::run, name);
 
-    // Start Indicator; 3 x (GREEN + BLUE + OFF)
-    StatusLedMgr::addToGreen(3);
-    StatusLedMgr::addToBlue(3);
+    // Start Indicator; 5 Blinks
+    StatusLedMgr::add(5);
 
     ioc.run();
 
