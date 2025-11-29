@@ -58,7 +58,7 @@ void StatusLedMgr::tickHandler() {
 
     count++;
 
-    timer.expires_after(std::chrono::milliseconds(200));
+    timer.expires_after(std::chrono::milliseconds(100));
     timer.async_wait( std::bind(&StatusLedMgr::tickHandler, this) );
 }
 
