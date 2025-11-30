@@ -1,5 +1,6 @@
 #include <boost/program_options.hpp>
 #include <google/protobuf/stubs/common.h>
+#include <mutex>
 #include <thread>
 
 #include "constants/network.h"
@@ -17,12 +18,17 @@ void runDaemon(const std::string& name, const std::string& description) {
     StatusLedMgr::initialize(ioc);
     PresenceNotifier::initialize(ioc, name, description);
 
-    std::thread learning_thread(LearningService::run, name);
-    std::thread listening_thread(ListeningService::run, name);
+    // We don't want to issue IR commands while learning a new command from
+    //  the IR sensor; Similarly, we don't want to mistake IR commands being
+    //  replayed for incoming, new commands. Subsequently, we need a mutex to
+    //  ensure the atomicity of IR operations.
+    std::mutex ir_operation;
 
-    // Start Indicator; 3 x (GREEN + BLUE + OFF)
-    StatusLedMgr::addToGreen(3);
-    StatusLedMgr::addToBlue(3);
+    std::thread learning_thread(LearningService::run, name, std::ref(ir_operation));
+    std::thread listening_thread(ListeningService::run, name, std::ref(ir_operation));
+
+    // Start Indicator; 5 Blinks
+    StatusLedMgr::add(5);
 
     ioc.run();
 
