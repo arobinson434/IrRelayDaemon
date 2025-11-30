@@ -17,10 +17,11 @@ gpiod::line::value operator!(gpiod::line::value val) {
     return gpiod::line::value::INACTIVE;
 }
 
-void ListeningService::run(const std::string& name) {
+void ListeningService::run(const std::string& name, std::mutex& ir_op) {
     ListeningService listening_service(name,
                                        bai::make_address(CMD_RECEIVE_ADDR),
-                                       CMD_RECEIVE_PORT);
+                                       CMD_RECEIVE_PORT,
+                                       ir_op);
 
     while ( true )
         if ( listening_service.receiveNetworkCommand() )
@@ -29,11 +30,13 @@ void ListeningService::run(const std::string& name) {
 
 ListeningService::ListeningService(const std::string&  name,
                                    const bai::address& mc_addr,
-                                   uint16_t            mc_port):
+                                   uint16_t            mc_port,
+                                   std::mutex&         ir_op ):
     name(name),
     io_ctx(),
     mcast_ep(mc_addr, mc_port),
-    socket(io_ctx, mcast_ep)
+    socket(io_ctx, mcast_ep),
+    ir_operation(ir_op)
 {
     socket.set_option(bai::multicast::join_group(mcast_ep.address()));
 }
@@ -66,6 +69,8 @@ void ListeningService::busyWaitUntil(const TimePoint& go_time) {
 }
 
 void ListeningService::issueIrCommand() {
+    std::lock_guard g(ir_operation);
+
     auto settings  = gpiod::line_settings()
                         .set_direction(gpiod::line::direction::OUTPUT);
     auto ir_offset = gpiod::line::offset(IR_OUTPUT);

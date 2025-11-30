@@ -8,10 +8,11 @@
 
 namespace bai  = boost::asio::ip;
 
-void LearningService::run(const std::string& name) {
+void LearningService::run(const std::string& name, std::mutex& ir_op) {
     LearningService learning_service(name,
                                      bai::make_address(CMD_ADVERTISE_ADDR),
-                                     CMD_ADVERTISE_PORT);
+                                     CMD_ADVERTISE_PORT,
+                                     ir_op);
 
     while ( true ) {
         learning_service.receiveIrCommand();
@@ -20,11 +21,13 @@ void LearningService::run(const std::string& name) {
 
 LearningService::LearningService(const std::string&  name,
                                  const bai::address& mc_addr,
-                                 uint16_t            mc_port):
+                                 uint16_t            mc_port,
+                                 std::mutex&         ir_op ):
     name(name),
     io_ctx(),
     mcast_ep(mc_addr, mc_port),
-    socket(io_ctx, mcast_ep.protocol())
+    socket(io_ctx, mcast_ep.protocol()),
+    ir_operation(ir_op)
 { }
 
 void LearningService::receiveIrCommand() {
@@ -43,6 +46,8 @@ void LearningService::receiveIrCommand() {
 
     ir_rcv_lr.wait_edge_events(std::chrono::seconds(-1));
     gpiod::edge_event_buffer buffer(100);
+
+    std::lock_guard g(ir_operation);
 
     while ( ir_rcv_lr.wait_edge_events(std::chrono::milliseconds(10)) ) {
         ir_rcv_lr.read_edge_events(buffer);
